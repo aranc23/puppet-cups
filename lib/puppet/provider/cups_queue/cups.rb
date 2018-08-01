@@ -56,7 +56,7 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
     destroy
 
     resource.should(:members).each do |member|
-      lpadmin('-E', '-p', member, '-c', name)
+      lpadmin('-p', member, '-c', name)
     end
 
     run_property_setter(:access, :description, :location, :options, :shared,
@@ -68,7 +68,7 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
     destroy
 
     # Create a minimal raw queue first, then adapt it
-    lpadmin('-E', '-p', name, '-v', 'file:///dev/null')
+    lpadmin('-p', name, '-v', 'file:///dev/null')
 
     run_parameter_setter(:model, :ppd)
 
@@ -99,7 +99,7 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
   private :run_attribute_setter
 
   def destroy
-    lpadmin('-E', '-x', name) if queue_exists?
+    lpadmin('-x', name) if queue_exists?
   end
 
   ### Property getters and setters
@@ -115,9 +115,9 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
 
   def accepting=(value)
     if value == :true
-      cupsaccept('-E', name)
+      cupsaccept(name)
     else
-      cupsreject('-E', name)
+      cupsreject(name)
     end
   end
 
@@ -128,7 +128,7 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
   end
 
   def access=(value)
-    lpadmin('-E', '-p', name, '-u', value['policy'] + ':' + value['users'].join(','))
+    lpadmin('-p', name, '-u', value['policy'] + ':' + value['users'].join(','))
   end
 
   def description
@@ -136,7 +136,7 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
   end
 
   def description=(value)
-    lpadmin('-E', '-p', name, '-D', value)
+    lpadmin('-p', name, '-D', value)
   end
 
   def enabled
@@ -145,9 +145,9 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
 
   def enabled=(value)
     if value == :true
-      while_root_allowed { cupsenable('-E', name) }
+      while_root_allowed { cupsenable(name) }
     else
-      cupsdisable('-E', name)
+      cupsdisable(name)
     end
   end
 
@@ -157,9 +157,9 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
 
   def held=(value)
     if value == :true
-      cupsdisable('-E', '--hold', name)
+      cupsdisable('--hold', name)
     else
-      cupsenable('-E', '--release', name)
+      cupsenable('--release', name)
     end
   end
 
@@ -168,7 +168,7 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
   end
 
   def location=(value)
-    lpadmin('-E', '-p', name, '-L', value)
+    lpadmin('-p', name, '-L', value)
   end
 
   def make_and_model
@@ -181,7 +181,7 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
   end
 
   def model=(value)
-    lpadmin('-E', '-p', name, '-m', value)
+    lpadmin('-p', name, '-m', value)
   end
 
   def members
@@ -200,12 +200,12 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
 
   def options=(options_should)
     options_should.each do |key, value|
-      lpadmin('-E', '-p', name, '-o', "#{key}=#{value}")
+      lpadmin('-p', name, '-o', "#{key}=#{value}")
     end
   end
 
   def ppd=(value)
-    lpadmin('-E', '-p', name, '-P', value)
+    lpadmin('-p', name, '-P', value)
   end
 
   def shared
@@ -213,7 +213,7 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
   end
 
   def shared=(value)
-    lpadmin('-E', '-p', name, '-o', "printer-is-shared=#{value}")
+    lpadmin('-p', name, '-o', "printer-is-shared=#{value}")
   end
 
   def uri
@@ -221,7 +221,7 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
   end
 
   def uri=(value)
-    lpadmin('-E', '-p', name, '-v', value)
+    lpadmin('-p', name, '-v', value)
   end
 
   private
@@ -311,7 +311,7 @@ Puppet::Type.type(:cups_queue).provide(:cups) do
   def vendor_options_is
     answer = {}
 
-    lpoptions('-E', '-p', name, '-l').each_line do |line|
+    lpoptions('-p', name, '-l').each_line do |line|
       result = %r{\A(?<key>\w+)/(.*):(.*)\*(?<value>\w+)}.match(line)
       answer[result[:key]] = result[:value] if result
     end
